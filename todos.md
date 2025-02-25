@@ -1,0 +1,1 @@
+- Structuring the prompt properly
