@@ -10,22 +10,29 @@ const app = express();
 
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://blogsummarizer.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+    credentials: true // Allow credentials if needed
+  })
+);
 app.use(log); // logging method and url of all incomming request
 
 // Home route
-app.get('/', (req, res) => {
-    try {
-        res.status(200).json({
-            messag: "home route"
-        });
-    } catch (error) {
-        console.error('[-] Error in home route:', error.message);
-        res.status(500).json({
-            error: error.message
-        });
-    }
-});
+//app.get('/', (req, res) => {
+//    try {
+//        res.status(200).json({
+//            messag: "home route"
+//        });
+//    } catch (error) {
+//        console.error('[-] Error in home route:', error.message);
+//        res.status(500).json({
+//            error: error.message
+//        });
+//    }
+//});
 
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -109,6 +116,12 @@ app.post('/summarize', async (req, res) => {
         });
     }
 })
+
+app.use(express.static(__dirname + '/views'));
+// app.use(express.urlencoded({ extended: true })); 
+app.get('/', (req, res) => {
+	res.status(200).sendFile(path.json(__dirname, '/views/index.html'));
+});
 
 // Handle 404 errors
 app.use((req, res) => {
