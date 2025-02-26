@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json())
 app.use(
   cors({
-    origin: "https://blogsummarizer.vercel.app",
+    origin: "https://brieflyio.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
     credentials: true // Allow credentials if needed
@@ -104,7 +104,7 @@ app.post('/summarize', async (req, res) => {
             })
         // console.log(completion.choices[0].message.content.trim())
         let content = JSON.parse(completion.choices[0].message.content.trim());
-        console.log(content);
+        // console.log(content);
         res.status(200).json({
             title: content.title,
             summary: content.summary
