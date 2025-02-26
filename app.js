@@ -8,7 +8,8 @@ dotenv.config();
 
 const app = express();
 
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.urlencoded({ extended: true }));
+app.use(express.json())
 app.use(cors());
 app.use(log); // logging method and url of all incomming request
 
@@ -32,20 +33,60 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 chat_history = [
     {
         "role": "system",
-        "content": "You are a helpful assistant which summarizes the blogs in a very efficient way explaining all the key points and key featur of the blog, Your response should be converted to html tags means should be md formate but not actually md but in html tags, you have to include necessary styles to display code block and other contents the code block should have dark background (all code blocks should be in a different line), and do not colors any content, and also do include anything in the reponse other than text, html tag and styles, and also do not include script tags of link tags for style sheets and scripts."
+        "content": `
+        You are a helpful assistant that summarizes blogs efficiently, capturing all key points and features of the blog.
+
+        - Your response should be formatted in HTML tags (similar to Markdown but using pure HTML).
+        - Ensure proper structuring with necessary styles for code blocks, which should:
+            - Have a dark background.
+            - Be placed on a separate line.
+            - Appear only when necessary (do not force code blocks).
+        - Do not apply colors to any content.
+        - Do not include anything other than text, HTML tags, and inline styles.
+        - Do not use <script> or <link> tags for styles or scripts.
+        - The response should be in properly structured HTML format.
+
+        - Response Format: Return the output in valid JSON format as shown below:
+            {
+                "title": "[Actual title of the blog]",
+                "summary": \`[Formatted blog summary in HTML tags]\`
+            }
+        `
     }
 ]
 
 app.post('/summarize', async (req, res) => {
     try {
         let blogLink = req.body.url;
+        console.log(blogLink)
 
         const completion = await groq.chat.completions
             .create({
                 messages: [
                     {
                         "role": "system",
-                        "content": "You are a helpful assistant which summarizes the blogs in a very efficient way explaining all the key points and key featur of the blog, Your response should be converted to html tags means should be md formate but not actually md but in html tags, you have to include necessary styles to display code block and other contents the code block should have dark background (all code blocks should be in a different line), and do not colors any content, and also do include anything in the reponse other than text, html tag and styles, and also do not include script tags of link tags for style sheets and scripts, and the contents should be in a proper formate."
+                        "content": `
+                        You are a helpful assistant that summarizes blogs efficiently, capturing all key points and features of the blog.
+
+                        - Your response should be formatted in HTML tags (similar to Markdown but using pure HTML).
+                        - Ensure proper structuring with necessary styles for code blocks, which should:
+                            - Have a dark background.
+                            - Be placed on a separate line.
+                            - Appear only when necessary (do not force code blocks).
+                        - All the key points should be in bullet points with proper headings.
+                        - Do proper formating like md like bold heading, sub heading, italic text, etc whenever needed.
+                        - Do not apply colors to any content.
+                        - Do not include anything other than text, HTML tags, and inline styles.
+                        - Do not use <script> or <link> tags for styles or scripts.
+                        - The response should be in properly structured HTML format.
+
+                        - Response Format: Return the output in valid JSON format as shown below:
+                            {
+                                "title": "[Actual title of the blog]",
+                                "summary": "[Formatted blog summary in HTML tags]"
+                            }
+                            - The whole summary text should be present only in one line and enclose it with double quotes ""
+                        `
                     },
                     {
                         role: "user",
@@ -54,9 +95,12 @@ app.post('/summarize', async (req, res) => {
                 ],
                 model: "llama-3.3-70b-versatile",
             })
-        // let content = completion.choices[0].message.content.trim().split('\n').join('<br>');
+        // console.log(completion.choices[0].message.content.trim())
+        let content = JSON.parse(completion.choices[0].message.content.trim());
+        console.log(content);
         res.status(200).json({
-            summary: completion.choices[0].message.content
+            title: content.title,
+            summary: content.summary
         })
     } catch (error) {
         console.error('[-] Error in summarize route:', error.message);
