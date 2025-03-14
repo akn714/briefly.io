@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json())
 app.use(
   cors({
-    origin: "https://brieflyio.vercel.app",
+    origin: ["https://brieflyio.vercel.app", "http://localhost:8080"],
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
     credentials: true // Allow credentials if needed
